@@ -1,0 +1,35 @@
+* Toveri
+
+A minimal process ring buffer to supervise and rotate on processes. It's like a
+process pool except that you don't keep hold of a process when you fetch one
+from a buffer.
+
+** API
+
+**** Make a supervised process ring buffer
+
+#+BEGIN_SRC
+toveri:new(RingBufName, MFA, Count) -> ok
+
+RingBufName = atom()
+MFA = mfa()
+Count = non_neg_integer()
+#+END_SRC
+
+**** Get a process from a buffer
+
+#+BEGIN_SRC
+toveri:get(RingBufName) -> {ok, Pid} | {error, {empty, Pos}}
+
+RingBufName = atom()
+Pid = pid()
+Pos = non_neg_integer()
+#+END_SRC
+
+**** Delete a supervised process ring buffer
+
+#+BEGIN_SRC
+toveri:delete(RingBufName) -> ok
+
+RingBufName = atom()
+#+END_SRC
