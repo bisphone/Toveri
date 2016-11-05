@@ -27,7 +27,7 @@
 
 -record(state, {name :: atom(),
                 len = 0 :: non_neg_integer(),
-                w_pos = 0 :: pos(),
+                w_pos = [] :: [pos()],
                 r_pos = 0 :: pos()}).
 
 %% -----------------------------------------------------------------------------
@@ -63,11 +63,15 @@ delete_pos(Name, Pos) ->
 %% -----------------------------------------------------------------------------
 init([Name, Len]) ->
     process_flag(trap_exit, true),
-    {ok, #state{name = Name, len = Len}}.
+    State = #state{name = Name,
+                   len = Len,
+                   w_pos = lists:seq(1, Len)},
+    {ok, State}.
 
 handle_call({insert, Pid}, _From, #state{name=Name}=State) ->
-    do_insert(Name, Pid, State),
-    NewState = State#state{w_pos = new_w_pos(State)},
+    [Pos|WPos] = new_w_pos(State),
+    do_insert(Name, Pid, Pos),
+    NewState = State#state{w_pos = WPos},
     {reply, ok, NewState};
 handle_call({read_pos, Pos}, _From, #state{name=Name}=State) ->
     Reply = do_read_pos(Name, Pos),
@@ -79,7 +83,8 @@ handle_call(read_next, _From, #state{name=Name}=State) ->
     {reply, Reply, NewState};
 handle_call({delete_pos, Pos}, _From, #state{name=Name}=State) ->
     do_delete_pos(Name, Pos),
-    {reply, ok, State};
+    NewState = State#state{w_pos = [Pos|State#state.w_pos]},
+    {reply, ok, NewState};
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
@@ -91,7 +96,8 @@ handle_cast(_Msg, State) ->
 handle_info({'DOWN', _, process, Pid, _}, State) ->
     {ok, Rbuf} = match_pid(State#state.name, Pid),
     true = delete_object(Rbuf),
-    {noreply, State#state{w_pos = Rbuf#ringbuf.pos - 1}};
+    NewState = State#state{w_pos = [Rbuf#ringbuf.pos|State#state.w_pos]},
+    {noreply, NewState};
 handle_info(_Info, State) ->
     {noreply, State}.
 
@@ -108,14 +114,16 @@ code_change(_OldVsn, State, _Extra) ->
 new_pos(Pos, Len) ->
     (Pos rem Len) + 1.
 
-new_w_pos(#state{w_pos=Pos, len=Len}) ->
-    new_pos(Pos, Len).
+new_w_pos(#state{w_pos=[], len=Len}) ->
+    lists:seq(1, Len);
+new_w_pos(#state{w_pos=[_|_]=WPos}) ->
+    WPos.
 
 new_r_pos(#state{r_pos=Pos, len=Len}) ->
     new_pos(Pos, Len).
 
-do_insert(Name, Pid, State) ->
-    true = insert(#ringbuf{name = Name, pos = new_w_pos(State), pid = Pid}),
+do_insert(Name, Pid, Pos) ->
+    true = insert(#ringbuf{name = Name, pos = Pos, pid = Pid}),
     erlang:monitor(process, Pid).
 
 do_read_pos(Name, Pos) ->
