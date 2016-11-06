@@ -108,8 +108,8 @@ supervised_buffer(_Config) ->
     Ring = supervised_buffer,
     MFA = {echo_server, start_link, []},
     Count = 15,
-    ok = toveri:new(Ring, MFA, Count),
-
+    {ok, _} = toveri:new(Ring, Count),
+    ok = toveri:add_child(Ring, MFA, Count),
     {ok, P1} = toveri:get(Ring),
     abc = echo_server:echo(P1, abc),
 

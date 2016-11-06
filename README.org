@@ -6,17 +6,28 @@ from a buffer.
 
 ** API
 
-**** Make a supervised process ring buffer
+**** Make a sized ring buffer
 
 #+BEGIN_SRC
-toveri:new(RingBufName, MFA, Count) -> ok
+toveri:new(RingBufName, Size) -> {ok, Pid}
+
+RingBufName = atom()
+Size = non_neg_integer()
+Pid = pid()
+#+END_SRC
+
+**** Add a child (or a number of children) to a ring buffer
+
+#+BEGIN_SRC
+add_child(RingBufName, MFA) -> ok
+add_child(RingBufName, MFA, Count) -> ok
 
 RingBufName = atom()
 MFA = mfa()
 Count = non_neg_integer()
 #+END_SRC
 
-**** Get a process from a buffer
+**** Get a process from a ring buffer
 
 #+BEGIN_SRC
 toveri:get(RingBufName) -> {ok, Pid} | {error, {empty, Pos}}
