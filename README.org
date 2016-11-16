@@ -9,11 +9,12 @@ from a buffer.
 **** Make a sized ring buffer
 
 #+BEGIN_SRC
-toveri:new(RingBufName, Size) -> {ok, Pid}
+toveri:new(RingBufName, Size) -> {ok, Pid} | {error, Reason}
 
 RingBufName = atom()
 Size = non_neg_integer()
 Pid = pid()
+Reason = {already_started, Pid}
 #+END_SRC
 
 **** Delete a supervised process ring buffer

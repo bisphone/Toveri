@@ -21,7 +21,7 @@
 %% -----------------------------------------------------------------------------
 %% API
 %% -----------------------------------------------------------------------------
--spec new(atom(), non_neg_integer()) -> ok.
+-spec new(atom(), size()) -> {ok, pid()} | {error, {already_started, pid()}}.
 new(Name, Size) ->
     toveri_sup:new_buf(Name, Size).
 
