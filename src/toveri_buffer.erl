@@ -6,6 +6,7 @@
 %% -----------------------------------------------------------------------------
 -export([start_link/2]).
 -export([stop/1]).
+-export([get_size/1]).
 -export([insert/2]).
 -export([read_pos/2]).
 -export([read_next/1]).
@@ -42,6 +43,10 @@ start_link(Name, Len) ->
 stop(Name) ->
     gen_server:cast(Name, stop).
 
+-spec get_size(atom()) -> {ok, non_neg_integer()}.
+get_size(Name) ->
+    gen_server:call(Name, get_size).
+
 -spec insert(atom(), pid()) -> ok.
 insert(Name, Pid) ->
     gen_server:call(Name, {insert, Pid}).
@@ -68,6 +73,8 @@ init([Name, Len]) ->
                    w_pos = lists:seq(1, Len)},
     {ok, State}.
 
+handle_call(get_size, _From, #state{len=Len}=State) ->
+    {reply, {ok, Len}, State};
 handle_call({insert, Pid}, _From, #state{name=Name}=State) ->
     [Pos|WPos] = new_w_pos(State),
     do_insert(Name, Pid, Pos),

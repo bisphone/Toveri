@@ -110,17 +110,17 @@ supervised_buffer(_Config) ->
     Count = 15,
     {ok, _} = toveri:new(Ring, Count),
     ok = toveri:add_child(Ring, MFA, Count),
-    {ok, P1} = toveri:get(Ring),
+    {ok, P1} = toveri:get_pid(Ring),
     abc = echo_server:echo(P1, abc),
 
-    {ok, P2} = toveri:get(Ring),
+    {ok, P2} = toveri:get_pid(Ring),
     abc = echo_server:echo(P2, abc),
 
     %% make sure two processes are not the same
     true = (P1 =/= P2),
 
     %% make sure it doesn't return {error, _}
-    [{ok, _} = toveri:get(Ring) || _ <- lists:seq(1, Count * 3)],
+    [{ok, _} = toveri:get_pid(Ring) || _ <- lists:seq(1, Count * 3)],
 
     %% kill two processes,
     %% and make sure two other processes replace the killed ones
@@ -128,7 +128,7 @@ supervised_buffer(_Config) ->
     exit(P2, kill),
     Elements = ets:lookup(?ETS_TAB, Ring),
     Count = length(Elements),
-    [{ok, _} = toveri:get(Ring) || _ <- lists:seq(1, Count * 3)],
+    [{ok, _} = toveri:get_pid(Ring) || _ <- lists:seq(1, Count * 3)],
 
     %% kill the childrend, and delete the ring buffer
     ok = toveri:delete(Ring).
