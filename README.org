@@ -16,6 +16,14 @@ Size = non_neg_integer()
 Pid = pid()
 #+END_SRC
 
+**** Delete a supervised process ring buffer
+
+#+BEGIN_SRC
+toveri:delete(RingBufName) -> ok
+
+RingBufName = atom()
+#+END_SRC
+
 **** Add a child (or a number of children) to a ring buffer
 
 #+BEGIN_SRC
@@ -27,20 +35,34 @@ MFA = mfa()
 Count = non_neg_integer()
 #+END_SRC
 
+**** Get the size of a ring buffer
+
+#+BEGIN_SRC
+toveri:get_size(RingBufName) -> {ok, Size} | {error, Reason}
+
+RingBufName = atom()
+Size = non_neg_integer()
+Reason = no_such_ring
+#+END_SRC
+
 **** Get a process from a ring buffer
 
 #+BEGIN_SRC
-toveri:get(RingBufName) -> {ok, Pid} | {error, {empty, Pos}}
+toveri:get_pid(RingBufName) -> {ok, Pid} | {error, Reason}
 
 RingBufName = atom()
 Pid = pid()
 Pos = non_neg_integer()
+Reason = no_such_ring | {empty, Pos}
 #+END_SRC
 
-**** Delete a supervised process ring buffer
+**** Get a process from a specific position of a ring buffer
 
 #+BEGIN_SRC
-toveri:delete(RingBufName) -> ok
+toveri:get_pid(RingBufName, Pos) -> {ok, Pid} | {error, Reason}
 
 RingBufName = atom()
+Pid = pid()
+Pos = non_neg_integer()
+Reason = no_such_ring | {empty, Pos}
 #+END_SRC
